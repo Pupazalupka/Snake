@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Snakes
 {
@@ -20,14 +21,20 @@ namespace Snakes
     /// </summary>
     public partial class MainWindow : Window
     {
+
         private const int SnakeSquareSize = 25;
         private int SnakeSpeedStart = 5;
 
         private readonly SolidColorBrush _snakeColor = Brushes.Green;
-        private readonly SolidColorBrush _appleColor = Brushes.Red;
-        private readonly SolidColorBrush _venomColor = Brushes.Blue;
-        private readonly SolidColorBrush _starColor = Brushes.Yellow;
+        
+        private enum Direction
+        {
+            Left, Right, Top, Bottom
+        }
 
+        private Direction _direction = Direction.Right;
+        private const int TimerInterval = 350;
+        private DispatcherTimer _timer;
 
         private Rectangle _snakeHead;
         private Point _applePosition;
@@ -51,6 +58,45 @@ namespace Snakes
             PlaceApple();
             PlaceVenom();
             PlaceStar();
+
+            _timer = new DispatcherTimer();
+            _timer.Tick += Timer_Tick;
+            _timer.Interval = TimeSpan.FromMilliseconds(TimerInterval);
+            _timer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            Point newHeadPosition = CalcuteNewHeadPosition();
+            Canvas.SetLeft(_snakeHead, newHeadPosition.X * SnakeSquareSize); ///расположение слева
+            Canvas.SetTop(_snakeHead, newHeadPosition.Y * SnakeSquareSize); /// расположение сверху
+        }
+
+        private Point CalcuteNewHeadPosition()
+        {
+            double left = Canvas.GetLeft(_snakeHead) / SnakeSquareSize;
+            double top = Canvas.GetTop(_snakeHead) / SnakeSquareSize;
+
+            Point headCurretPosition = new Point(left, top);
+            Point newHeadPosition = new Point();
+
+            switch(_direction)
+            {
+                case Direction.Left:
+                    newHeadPosition = new Point(headCurretPosition.X - 1, headCurretPosition.Y);
+                    break;
+                case Direction.Right:
+                    newHeadPosition = new Point(headCurretPosition.X + 1, headCurretPosition.Y);
+                    break;
+                case Direction.Top:
+                    newHeadPosition = new Point(headCurretPosition.X, headCurretPosition.Y - 1);
+                    break;
+                case Direction.Bottom:
+                    newHeadPosition = new Point(headCurretPosition.X, headCurretPosition.Y + 1);
+                    break;
+            }
+
+            return newHeadPosition;
         }
 
         private void PlaceApple()
@@ -135,6 +181,29 @@ namespace Snakes
             Canvas.SetTop(rectangle, position.Y * SnakeSquareSize); /// расположение сверху
 
             return rectangle;
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch(e.Key)
+            {
+                case Key.Up:
+                    if(_direction != Direction.Bottom)
+                        _direction = Direction.Top;
+                    break;
+                case Key.Down:
+                    if (_direction != Direction.Top)
+                        _direction = Direction.Bottom;
+                    break;
+                case Key.Left:
+                    if (_direction != Direction.Right)
+                        _direction = Direction.Left;
+                    break;
+                case Key.Right:
+                    if (_direction != Direction.Left)
+                        _direction = Direction.Right;
+                    break;
+            }
         }
     }
 }
