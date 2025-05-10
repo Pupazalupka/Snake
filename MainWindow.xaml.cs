@@ -33,7 +33,7 @@ namespace Snakes
         }
 
         private Direction _direction = Direction.Right;
-        private const int TimerInterval = 350;
+        private const int TimerInterval = 300;
         private DispatcherTimer _timer;
 
         private Rectangle _snakeHead;
@@ -41,8 +41,11 @@ namespace Snakes
         private Point _venomPosition;
         private Point _starPosition;
 
-        private static readonly Random random = new Random(); 
+        private static readonly Random random = new Random();
 
+        private List<Rectangle> _snake = new List<Rectangle>();
+
+        private List<Image> appleImageList = new List<Image>();
 
         public MainWindow()
         {
@@ -53,6 +56,7 @@ namespace Snakes
         private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
         {
             _snakeHead = CreateSnakeSegment(new Point(5, 5));
+            _snake.Add(_snakeHead);
             GameCanvas.Children.Add(_snakeHead);
 
             PlaceApple();
@@ -68,8 +72,36 @@ namespace Snakes
         private void Timer_Tick(object sender, EventArgs e)
         {
             Point newHeadPosition = CalcuteNewHeadPosition();
+
+            if(newHeadPosition == _applePosition)
+            {
+                EatApple();
+                PlaceApple();
+            }
+
+            for(int i = _snake.Count - 1; i > 0; i--)
+            {
+                Canvas.SetLeft(_snake[i], Canvas.GetLeft(_snake[i - 1])); ///расположение слева
+                Canvas.SetTop(_snake[i], Canvas.GetTop(_snake[i - 1])); /// расположение сверху
+            }
+
             Canvas.SetLeft(_snakeHead, newHeadPosition.X * SnakeSquareSize); ///расположение слева
             Canvas.SetTop(_snakeHead, newHeadPosition.Y * SnakeSquareSize); /// расположение сверху
+        }
+
+        private void EatApple()
+        {
+            foreach(var element in GameCanvas.Children.OfType<Image>().ToList())
+            {
+                if(element.Tag?.ToString() == "Apple")
+                {
+                    GameCanvas.Children.Remove(element);
+                }
+            }
+
+            Rectangle newSnake = CreateSnakeSegment(_applePosition);
+            _snake.Add(newSnake);
+            GameCanvas.Children.Add(newSnake);
         }
 
         private Point CalcuteNewHeadPosition()
@@ -116,6 +148,9 @@ namespace Snakes
                 Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\яблоко.png"))
             };
 
+            appleImage.Tag = "Apple";
+            appleImageList.Add(appleImage);
+
             Canvas.SetLeft(appleImage, appleX * SnakeSquareSize); ///расположение слева
             Canvas.SetTop(appleImage, appleY * SnakeSquareSize); /// расположение сверху
 
@@ -139,6 +174,8 @@ namespace Snakes
                 Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\яд.jpg.png"))
             };
 
+            venomImage.Tag = "Venom";
+
             Canvas.SetLeft(venomImage, venomX * SnakeSquareSize); ///расположение слева
             Canvas.SetTop(venomImage, venomY * SnakeSquareSize); /// расположение сверху
 
@@ -161,6 +198,8 @@ namespace Snakes
                 Height = SnakeSquareSize,
                 Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\звезда.png"))
             };
+
+            starImage.Tag = "Star";
 
             Canvas.SetLeft(starImage, starX * SnakeSquareSize); ///расположение слева
             Canvas.SetTop(starImage, starY * SnakeSquareSize); /// расположение сверху
