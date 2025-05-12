@@ -47,6 +47,8 @@ namespace Snakes
 
         private List<Image> appleImageList = new List<Image>();
 
+        private int _score = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -72,11 +74,39 @@ namespace Snakes
         private void Timer_Tick(object sender, EventArgs e)
         {
             Point newHeadPosition = CalcuteNewHeadPosition();
-
+            
             if(newHeadPosition == _applePosition)
             {
                 EatApple();
                 PlaceApple();
+                
+            }
+
+            if(newHeadPosition.X < 0 || newHeadPosition.Y < 0
+                || newHeadPosition.X >= GameCanvas.ActualWidth / SnakeSquareSize
+                || newHeadPosition.Y >= GameCanvas.ActualHeight / SnakeSquareSize)
+            {
+                EndGame();
+                return;
+            }
+
+            if(_snake.Count >= 4)
+            {
+                for(int i = 0; i < _snake.Count; i ++)
+                {
+                    Point currentPos = new Point(Canvas.GetLeft(_snake[i]), Canvas.GetTop(_snake[i]));
+
+                    for(int j = i + 1; j < _snake.Count; j ++)
+                    {
+                        Point nextPos = new Point(Canvas.GetLeft(_snake[j]), Canvas.GetTop(_snake[j]));
+
+                        if (currentPos == nextPos)
+                        {
+                            EndGame();
+                            return;
+                        }
+                    }
+                }
             }
 
             for(int i = _snake.Count - 1; i > 0; i--)
@@ -89,8 +119,15 @@ namespace Snakes
             Canvas.SetTop(_snakeHead, newHeadPosition.Y * SnakeSquareSize); /// расположение сверху
         }
 
+        private void EndGame()
+        {
+            _timer.Stop();
+        }
+
         private void EatApple()
         {
+            _score++;
+            ScoreTextBlock.Text = "Score: " + _score.ToString();
             foreach(var element in GameCanvas.Children.OfType<Image>().ToList())
             {
                 if(element.Tag?.ToString() == "Apple")
@@ -103,6 +140,7 @@ namespace Snakes
             _snake.Add(newSnake);
             GameCanvas.Children.Add(newSnake);
         }
+
 
         private Point CalcuteNewHeadPosition()
         {
@@ -145,7 +183,7 @@ namespace Snakes
             {
                 Width = SnakeSquareSize,
                 Height = SnakeSquareSize,
-                Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\яблоко.png"))
+                Source = new BitmapImage(new Uri("pack://application:,,,/img/яблоко.png"))
             };
 
             appleImage.Tag = "Apple";
@@ -171,7 +209,7 @@ namespace Snakes
             {
                 Width = SnakeSquareSize,
                 Height = SnakeSquareSize,
-                Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\яд.jpg.png"))
+                Source = new BitmapImage(new Uri("pack://application:,,,/img/яд.jpg.png"))
             };
 
             venomImage.Tag = "Venom";
@@ -196,7 +234,7 @@ namespace Snakes
             {
                 Width = SnakeSquareSize,
                 Height = SnakeSquareSize,
-                Source = new BitmapImage(new Uri("D:\\User\\C\\Snakes\\Snakes\\img\\звезда.png"))
+                Source = new BitmapImage(new Uri("pack://application:,,,/img/звезда.png"))
             };
 
             starImage.Tag = "Star";

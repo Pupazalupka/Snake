@@ -8,5 +8,6 @@
         Title="MainWindow" Height="450" Width="800" KeyDown="Window_KeyDown">
     <Grid>
         <Canvas x:Name="GameCanvas" Background="Black" Focusable="True"></Canvas>
+        <TextBlock x:Name="ScoreTextBlock" Text="Score: 0" Foreground="White" HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" />
     </Grid>
 </Window>
