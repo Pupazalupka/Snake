@@ -23,7 +23,6 @@ namespace Snakes
     {
 
         private const int SnakeSquareSize = 25;
-        private int SnakeSpeedStart = 5;
 
         private readonly SolidColorBrush _snakeColor = Brushes.Green;
         
@@ -33,8 +32,11 @@ namespace Snakes
         }
 
         private Direction _direction = Direction.Right;
-        private const int TimerInterval = 300;
-        private DispatcherTimer _timer;
+        private const int TimerInterval = 300; // начальная скорость
+        private DispatcherTimer _timer; // таймер для движения
+        private int _currentInterval = TimerInterval;
+
+        private const int SpeedBoost = 5000; //длительность ускорения 5 секунд
 
         private Rectangle _snakeHead;
         private Point _applePosition;
@@ -48,6 +50,8 @@ namespace Snakes
         private List<Image> appleImageList = new List<Image>();
 
         private int _score = 0;
+        
+
 
         public MainWindow()
         {
@@ -68,6 +72,7 @@ namespace Snakes
             _timer = new DispatcherTimer();
             _timer.Tick += Timer_Tick;
             _timer.Interval = TimeSpan.FromMilliseconds(TimerInterval);
+            _timer.Interval = TimeSpan.FromMilliseconds(_currentInterval);
             _timer.Start();
         }
 
@@ -82,7 +87,19 @@ namespace Snakes
                 
             }
 
-            if(newHeadPosition.X < 0 || newHeadPosition.Y < 0
+            if(newHeadPosition == _venomPosition)
+            {
+                EatVenom();
+                PlaceVenom();
+            }
+
+            if (newHeadPosition == _starPosition)
+            {
+                EatStar();
+                PlaceStar();
+            }
+
+            if (newHeadPosition.X < 0 || newHeadPosition.Y < 0
                 || newHeadPosition.X >= GameCanvas.ActualWidth / SnakeSquareSize
                 || newHeadPosition.Y >= GameCanvas.ActualHeight / SnakeSquareSize)
             {
@@ -141,6 +158,56 @@ namespace Snakes
             GameCanvas.Children.Add(newSnake);
         }
 
+        private void EatVenom()
+        {
+            _score = Math.Max(0, _score - 10);
+            ScoreTextBlock.Text = "Score: " + _score.ToString();
+            foreach (var element in GameCanvas.Children.OfType<Image>().ToList())
+            {
+                if (element.Tag?.ToString() == "Venom")
+                {
+                    GameCanvas.Children.Remove(element);
+                }
+            }
+        }
+
+        private void EatStar()
+        {
+            foreach (var element in GameCanvas.Children.OfType<Image>().ToList())
+            {
+                if (element.Tag?.ToString() == "Star")
+                {
+                    GameCanvas.Children.Remove(element);
+                }
+            }
+
+            ApplySpeedBoost(); // Активируем ускорение
+            StartBoostTimer(); // Запускаем таймер отката
+        }
+
+        private void ApplySpeedBoost()
+        {
+            _currentInterval = (int)(TimerInterval * 0.6); // уменьшаем интервал на 40%
+            _timer.Interval = TimeSpan.FromMilliseconds(_currentInterval);
+        }
+
+        private void StartBoostTimer()
+        {
+            var boostTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(SpeedBoost)
+            };
+
+            boostTimer.Tick += (s, e) =>
+            {
+                _currentInterval = TimerInterval;
+                _timer.Interval = TimeSpan.FromMilliseconds(_currentInterval);
+                _timer.Start();
+                ((DispatcherTimer)s).Stop();
+            };
+
+            boostTimer.Start();
+        }
 
         private Point CalcuteNewHeadPosition()
         {
