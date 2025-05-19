@@ -8,6 +8,8 @@
         Title="MainWindow" Height="450" Width="800" KeyDown="Window_KeyDown">
     <Grid>
         <Canvas x:Name="GameCanvas" Background="Black" Focusable="True"></Canvas>
-        <TextBlock x:Name="ScoreTextBlock" Text="Score: 0" Foreground="White" HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" />
+        <TextBlock x:Name="ScoreTextBlock" Text="Score: 0" Foreground="White" HorizontalAlignment="Right" Margin="0,26,689,0" VerticalAlignment="Top" Height="38" FontSize="22" Width="82" />
+        <Button x:Name="RestartButton" Content="Restart" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" Click="RestartButton_Click"  Width="150" Height="100" FontSize="30" Background="Red" FontFamily="Arial Black" />
+        <Button x:Name="StartGame" Content="Start" HorizontalAlignment="Center" VerticalAlignment="Center"  Click="StartGame_Click"  Width="150" Height="100" FontSize="40" Background="#FF0FDC05" FontFamily="Arial Black" />
     </Grid>
 </Window>

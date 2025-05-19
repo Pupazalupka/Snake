@@ -50,16 +50,16 @@ namespace Snakes
         private List<Image> appleImageList = new List<Image>();
 
         private int _score = 0;
-        
+
 
 
         public MainWindow()
         {
             InitializeComponent();
-            GameCanvas.Loaded += GameCanvas_Loaded;
+
         }
 
-        private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
+        private void InitialGame()
         {
             _snakeHead = CreateSnakeSegment(new Point(5, 5));
             _snake.Add(_snakeHead);
@@ -139,6 +139,7 @@ namespace Snakes
         private void EndGame()
         {
             _timer.Stop();
+            RestartButton.Visibility = Visibility.Visible;
         }
 
         private void EatApple()
@@ -348,6 +349,24 @@ namespace Snakes
                         _direction = Direction.Right;
                     break;
             }
+        }
+
+        private void RestartButton_Click(object sender, RoutedEventArgs e)
+        {
+            _score = 0;
+            ScoreTextBlock.Text = "Score: 0";
+
+            GameCanvas.Children.Clear();
+            _snake.Clear();
+
+            RestartButton.Visibility = Visibility.Collapsed;
+            InitialGame();
+        }
+
+        private void StartGame_Click(object sender, RoutedEventArgs e)
+        {
+            InitialGame();
+            StartGame.Visibility = Visibility.Collapsed;
         }
     }
 }
